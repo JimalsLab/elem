@@ -6,18 +6,23 @@ using System.Linq;
 
 public class MapManager : MonoBehaviour
 {
-    public int GrassPercentage;
+    public long seed;
+    public int GrassPercentage = 50;
+    public int DirtPercentage = 25;
     public int MapSize;
     public Material GGGG;
     public Material DGGG;
+    public Material GDGG;
     public Material GGDG;
+    public Material GGGD;
+    public Material DDDD;
     public Material XXXX;
 
     public List<Tile> Map;
     // Start is called before the first frame update
     void Start()
     {
-        generateMap(MapSize, 1, 1);
+        generateMap(seed, MapSize, 1, 1);
     }
 
     // Update is called once per frame
@@ -27,16 +32,17 @@ public class MapManager : MonoBehaviour
 
     public void RegenMap()
     {
+        seed += 1;
         Map ??= new List<Tile>();
         foreach (var tile in Map)
         {
             Destroy(tile.Obj);
         }
         Map.Clear();
-        generateMap(MapSize, 1, 1);
+        generateMap(seed, MapSize, 1, 1);
     }
 
-    private void generateMap(int generationIterations, int playerSlotsNumber, int enemySlotsNumber)
+    private void generateMap(long seed,int generationIterations, int playerSlotsNumber, int enemySlotsNumber)
     {
         Map = new List<Tile>();
         var originTile = new Tile(0, 0, 0);
@@ -45,10 +51,10 @@ public class MapManager : MonoBehaviour
         originCube.GetComponent<MeshRenderer>().material = GGDG;
         originTile.Obj = originCube;
         Map.Add(originTile);
-        StartCoroutine(generateAdjacentTiles(generationIterations, originTile));
+        StartCoroutine(generateAdjacentTiles(seed, generationIterations, originTile));
     }
 
-    private IEnumerator generateAdjacentTiles(int generationIterationsLeft,Tile originTile)
+    private IEnumerator generateAdjacentTiles(long seed,int generationIterationsLeft,Tile originTile)
     {
         if (generationIterationsLeft > 0)
         {
@@ -59,56 +65,56 @@ public class MapManager : MonoBehaviour
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.position = new Vector3(northTile.X, northTile.Y, northTile.Z);
-                northTile.Type = CalculateTileType(northTile, Map);
+                northTile.Type = CalculateTileType(seed,northTile, Map);
                 cube.GetComponent<MeshRenderer>().material = getMaterialFromType(northTile.Type);
                 northTile.Obj = cube;
                 Map.Add(northTile);
+                yield return new WaitForSeconds(0.1f);
+                StartCoroutine(generateAdjacentTiles(seed*2,generationIterationsLeft, northTile));
             }
-            yield return new WaitForSeconds(0.1f);
-            StartCoroutine(generateAdjacentTiles(generationIterationsLeft, northTile));
 
             var eastTile = new Tile(originTile.X, originTile.Y, originTile.Z+1);
             if (Map.Where(m => m.X == eastTile.X && m.Z == eastTile.Z && m.Y == eastTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.position = new Vector3(eastTile.X, eastTile.Y, eastTile.Z);
-                eastTile.Type = CalculateTileType(eastTile, Map);
+                eastTile.Type = CalculateTileType(seed, eastTile, Map);
                 cube.GetComponent<MeshRenderer>().material = getMaterialFromType(eastTile.Type);
                 eastTile.Obj = cube;
                 Map.Add(eastTile);
+                yield return new WaitForSeconds(0.1f);
+                StartCoroutine(generateAdjacentTiles(seed*3,generationIterationsLeft, eastTile));
             }
-            yield return new WaitForSeconds(0.1f);
-            StartCoroutine(generateAdjacentTiles(generationIterationsLeft, eastTile));
 
             var southTile = new Tile(originTile.X - 1, originTile.Y, originTile.Z);
             if (Map.Where(m => m.X == southTile.X && m.Z == southTile.Z && m.Y == southTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.position = new Vector3(southTile.X, southTile.Y, southTile.Z);
-                southTile.Type = CalculateTileType(southTile, Map);
+                southTile.Type = CalculateTileType(seed, southTile, Map);
                 cube.GetComponent<MeshRenderer>().material = getMaterialFromType(southTile.Type);
                 southTile.Obj = cube;
                 Map.Add(southTile);
+                yield return new WaitForSeconds(0.1f);
+                StartCoroutine(generateAdjacentTiles(seed*5,generationIterationsLeft, southTile));
             }
-            yield return new WaitForSeconds(0.1f);
-            StartCoroutine(generateAdjacentTiles(generationIterationsLeft, southTile));
 
             var westTile = new Tile(originTile.X, originTile.Y, originTile.Z - 1);
             if (Map.Where(m => m.X == westTile.X && m.Z == westTile.Z && m.Y == westTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.position = new Vector3(westTile.X, westTile.Y, westTile.Z);
-                westTile.Type = CalculateTileType(westTile, Map);
+                westTile.Type = CalculateTileType(seed, westTile, Map);
                 cube.GetComponent<MeshRenderer>().material = getMaterialFromType(westTile.Type);
                 westTile.Obj = cube;
                 Map.Add(westTile);
+                yield return new WaitForSeconds(0.1f);
+                StartCoroutine(generateAdjacentTiles(seed*7,generationIterationsLeft, westTile));
             }
-            yield return new WaitForSeconds(0.1f);
-            StartCoroutine(generateAdjacentTiles(generationIterationsLeft, westTile));
         }
     }
 
-    public TileType CalculateTileType(Tile tile, List<Tile> map)
+    public TileType CalculateTileType(long seed, Tile tile, List<Tile> map)
     {
         List<Tile> adjacentTiles = GetAdjacentTiles(tile, map);
         List<string> wildcardType = new List<string>
@@ -132,7 +138,6 @@ public class MapManager : MonoBehaviour
             var removeType = false;
             if (wildcardType[0] != "X" && wildcardType[0] != tileType.ToString().Substring(0, 1))
             {
-                var a = tileType.ToString().Substring(0, 1);
                 removeType = true;
             }
             if (wildcardType[1] != "X" && wildcardType[1] != tileType.ToString().Substring(1, 1))
@@ -159,21 +164,29 @@ public class MapManager : MonoBehaviour
             return TileType.XXXX;
         }
 
-        System.Random random = new System.Random();
-        GrassPercentage = GrassPercentage == 0 ? 50 : GrassPercentage;
+        while (DirtPercentage+GrassPercentage >= (100-availableTileTypes.Count))
+        {
+            DirtPercentage -= availableTileTypes.Count;
+            GrassPercentage -= availableTileTypes.Count;
+        }
 
         var availablePicks = new List<TileType>();
         if (availableTileTypes.Contains(TileType.GGGG) && availableTileTypes.Count > 1)
         {
             availableTileTypes.Remove(TileType.GGGG);
-            for (var i = 0; i < 100 - GrassPercentage; i++)
+            for (var i = 0; i < 100 - GrassPercentage - DirtPercentage; i++)
             {
-                var r = random.Next(0, availableTileTypes.Count);
+                var r = Mathf.Abs((int)seed%availableTileTypes.Count);
                 availablePicks.Add(availableTileTypes[r]);
+                seed *= 3;
             }
             for (var i = 0; i < GrassPercentage; i++)
             {
                 availablePicks.Add(TileType.GGGG);
+            }
+            for (var i = 0; i < DirtPercentage; i++)
+            {
+                availablePicks.Add(TileType.DDDD);
             }
         }
         else
@@ -181,8 +194,7 @@ public class MapManager : MonoBehaviour
             availablePicks.AddRange(availableTileTypes);
         }
 
-        var rnd = random.Next(0, availablePicks.Count);
-        return availablePicks[rnd];
+        return availablePicks[Mathf.Abs((int)seed % availablePicks.Count)];
     }
 
     public List<Tile> GetAdjacentTiles(Tile tile,List<Tile> map)
@@ -205,8 +217,14 @@ public class MapManager : MonoBehaviour
                 return GGGG;
             case TileType.DGGG:
                 return DGGG;
+            case TileType.GDGG:
+                return GDGG;
             case TileType.GGDG:
                 return GGDG;
+            case TileType.GGGD:
+                return GGGD;
+            case TileType.DDDD:
+                return DDDD;
             default:
                 return XXXX;
         }
@@ -240,6 +258,9 @@ public class MapManager : MonoBehaviour
         XXXX,
         GGGG,
         DGGG,
-        GGDG
+        GDGG,
+        GGDG,
+        GGGD,
+        DDDD
     }
 }
