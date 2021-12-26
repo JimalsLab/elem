@@ -73,3 +73,5 @@ crashlytics-build.properties
 /ProjectSettings
 /.vsconfig
 /Assets/Robot Kyle
+*.so
+*.meta

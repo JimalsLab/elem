@@ -229,30 +229,6 @@ public class MapManager : MonoBehaviour
                 return XXXX;
         }
     }
-
-    public class Tile
-    {
-        public string Id { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
-        public TileType Type { get; set; }
-        public GameObject Obj { get; set; }
-
-        public Tile(int x, int y, int z)
-        {
-            Id = new Guid().ToString();
-            X = x;
-            Y = y;
-            Z = z;
-        }
-
-        public Tile(TileType t)
-        {
-            Type = t;
-        }
-    }
-
     public enum TileType
     {
         XXXX,
