@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public SettingsManager settingsManager;
     private void Start() {
         settingsManager = new SettingsManager();
-        worldMapManager = new WorldMapManager(); // a terme ça ira dans une fction appelée quand on lance le jeu
+        worldMapManager = new WorldMapManager(Difficulty.NORMAL); // a terme ça ira dans une fction appelée quand on lance le jeu
     }
 
     private void Update() {

@@ -6,8 +6,8 @@ using System.Linq;
 public class WorldMapManager : MonoBehaviour {
 
     public List<LevelManager> levels;
-    public int difficultyScale;
-    public int lootScale;
+    public float difficultyScale;
+    public float lootScale;
     private void Start() {
         levels = new List<LevelManager>();
     }
