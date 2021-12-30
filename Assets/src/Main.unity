@@ -343,13 +343,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 2147483
-  GrassPercentage: 80
-  MapSize: 10
+  scale: 1
+  GrassPercentage: 70
+  DirtPercentage: 20
+  MapSize: 15
   GGGG: {fileID: 2100000, guid: c22fe6bd0b7bb2d4c938ad8157c77165, type: 2}
   DGGG: {fileID: 2100000, guid: bb54fe3bb73c8494f923a76a7270aa01, type: 2}
-  GDGG: {fileID: 2100000, guid: 000f237e4f2fb7742b39a4aaac0e9ea5, type: 2}
+  GDGG: {fileID: 2100000, guid: 2e5d4ae31ea8c654788f95f5df48081c, type: 2}
   GGDG: {fileID: 2100000, guid: 48ace882f3ae0ea4ea71699e890aaa81, type: 2}
-  GGGD: {fileID: 2100000, guid: 2e5d4ae31ea8c654788f95f5df48081c, type: 2}
+  GGGD: {fileID: 2100000, guid: 000f237e4f2fb7742b39a4aaac0e9ea5, type: 2}
   DDDD: {fileID: 2100000, guid: 0e8484cf9f8ed93488680bbdbdc2f9f2, type: 2}
   XXXX: {fileID: 2100000, guid: 3bbce75bc1db219468b0d31cc71ed3a4, type: 2}
 --- !u!114 &223974229

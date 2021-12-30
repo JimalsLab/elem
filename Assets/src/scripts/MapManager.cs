@@ -7,6 +7,8 @@ using System.Linq;
 public class MapManager : MonoBehaviour
 {
     public long seed;
+    public float scale =1f;
+    private float parsedSeed = 0.232432423424f;
     public int GrassPercentage = 50;
     public int DirtPercentage = 25;
     public int MapSize;
@@ -22,7 +24,9 @@ public class MapManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        generateMap(seed, MapSize, 1, 1);
+        parsedSeed = float.Parse("0,"+seed.ToString());
+
+        generateMap(seed, MapSize, 1, 1, scale);
     }
 
     // Update is called once per frame
@@ -32,17 +36,17 @@ public class MapManager : MonoBehaviour
 
     public void RegenMap()
     {
-        seed += 1;
+        parsedSeed = float.Parse("0," + seed.ToString());
         Map ??= new List<Tile>();
         foreach (var tile in Map)
         {
             Destroy(tile.Obj);
         }
         Map.Clear();
-        generateMap(seed, MapSize, 1, 1);
+        generateMap(seed, MapSize, 1, 1, scale);
     }
 
-    private void generateMap(long seed,int generationIterations, int playerSlotsNumber, int enemySlotsNumber)
+    private void generateMap(long seed,int generationIterations, int playerSlotsNumber, int enemySlotsNumber, float scale)
     {
         Map = new List<Tile>();
         var originTile = new Tile(0, 0, 0);
@@ -51,16 +55,16 @@ public class MapManager : MonoBehaviour
         originCube.GetComponent<MeshRenderer>().material = GGDG;
         originTile.Obj = originCube;
         Map.Add(originTile);
-        StartCoroutine(generateAdjacentTiles(seed, generationIterations, originTile));
+        StartCoroutine(generateAdjacentTiles(seed, generationIterations, originTile, scale));
     }
 
-    private IEnumerator generateAdjacentTiles(long seed,int generationIterationsLeft,Tile originTile)
+    private IEnumerator generateAdjacentTiles(long seed,int generationIterationsLeft,Tile originTile, float scale)
     {
         if (generationIterationsLeft > 0)
         {
             generationIterationsLeft -= 1;
 
-            var northTile = new Tile(originTile.X + 1, originTile.Y, originTile.Z);
+            var northTile = new Tile(originTile.X+1 , CalculateNoise(originTile.X+1,originTile.Z, scale), originTile.Z);
             if (Map.Where(m => m.X == northTile.X && m.Z == northTile.Z && m.Y == northTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -70,10 +74,10 @@ public class MapManager : MonoBehaviour
                 northTile.Obj = cube;
                 Map.Add(northTile);
                 yield return new WaitForSeconds(0.1f);
-                StartCoroutine(generateAdjacentTiles(seed*2,generationIterationsLeft, northTile));
+                StartCoroutine(generateAdjacentTiles(seed*2,generationIterationsLeft, northTile, scale));
             }
 
-            var eastTile = new Tile(originTile.X, originTile.Y, originTile.Z+1);
+            var eastTile = new Tile(originTile.X, CalculateNoise(originTile.X, originTile.Z+1, scale), originTile.Z+1);
             if (Map.Where(m => m.X == eastTile.X && m.Z == eastTile.Z && m.Y == eastTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -83,10 +87,10 @@ public class MapManager : MonoBehaviour
                 eastTile.Obj = cube;
                 Map.Add(eastTile);
                 yield return new WaitForSeconds(0.1f);
-                StartCoroutine(generateAdjacentTiles(seed*3,generationIterationsLeft, eastTile));
+                StartCoroutine(generateAdjacentTiles(seed*3,generationIterationsLeft, eastTile, scale));
             }
 
-            var southTile = new Tile(originTile.X - 1, originTile.Y, originTile.Z);
+            var southTile = new Tile(originTile.X - 1, CalculateNoise(originTile.X - 1, originTile.Z, scale), originTile.Z);
             if (Map.Where(m => m.X == southTile.X && m.Z == southTile.Z && m.Y == southTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -96,10 +100,10 @@ public class MapManager : MonoBehaviour
                 southTile.Obj = cube;
                 Map.Add(southTile);
                 yield return new WaitForSeconds(0.1f);
-                StartCoroutine(generateAdjacentTiles(seed*5,generationIterationsLeft, southTile));
+                StartCoroutine(generateAdjacentTiles(seed*5,generationIterationsLeft, southTile, scale));
             }
 
-            var westTile = new Tile(originTile.X, originTile.Y, originTile.Z - 1);
+            var westTile = new Tile(originTile.X, CalculateNoise(originTile.X, originTile.Z-1, scale), originTile.Z - 1);
             if (Map.Where(m => m.X == westTile.X && m.Z == westTile.Z && m.Y == westTile.Y).Count() == 0)
             {
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -109,7 +113,7 @@ public class MapManager : MonoBehaviour
                 westTile.Obj = cube;
                 Map.Add(westTile);
                 yield return new WaitForSeconds(0.1f);
-                StartCoroutine(generateAdjacentTiles(seed*7,generationIterationsLeft, westTile));
+                StartCoroutine(generateAdjacentTiles(seed*7,generationIterationsLeft, westTile, scale));
             }
         }
     }
@@ -171,9 +175,10 @@ public class MapManager : MonoBehaviour
         }
 
         var availablePicks = new List<TileType>();
-        if (availableTileTypes.Contains(TileType.GGGG) && availableTileTypes.Count > 1)
+        if (availableTileTypes.Contains(TileType.GGGG) && availableTileTypes.Contains(TileType.DDDD) && availableTileTypes.Count > 1)
         {
             availableTileTypes.Remove(TileType.GGGG);
+            availableTileTypes.Remove(TileType.DDDD);
             for (var i = 0; i < 100 - GrassPercentage - DirtPercentage; i++)
             {
                 var r = Mathf.Abs((int)seed%availableTileTypes.Count);
@@ -187,6 +192,34 @@ public class MapManager : MonoBehaviour
             for (var i = 0; i < DirtPercentage; i++)
             {
                 availablePicks.Add(TileType.DDDD);
+            }
+        }
+        else if (availableTileTypes.Contains(TileType.DDDD) && availableTileTypes.Count > 1)
+        {
+            availableTileTypes.Remove(TileType.DDDD);
+            for (var i = 0; i < 100 - DirtPercentage; i++)
+            {
+                var r = Mathf.Abs((int)seed % availableTileTypes.Count);
+                availablePicks.Add(availableTileTypes[r]);
+                seed *= 3;
+            }
+            for (var i = 0; i < DirtPercentage; i++)
+            {
+                availablePicks.Add(TileType.DDDD);
+            }
+        }
+        else if (availableTileTypes.Contains(TileType.GGGG) && availableTileTypes.Count > 1)
+        {
+            availableTileTypes.Remove(TileType.GGGG);
+            for (var i = 0; i < 100 - GrassPercentage; i++)
+            {
+                var r = Mathf.Abs((int)seed % availableTileTypes.Count);
+                availablePicks.Add(availableTileTypes[r]);
+                seed *= 3;
+            }
+            for (var i = 0; i < GrassPercentage; i++)
+            {
+                availablePicks.Add(TileType.GGGG);
             }
         }
         else
@@ -207,6 +240,15 @@ public class MapManager : MonoBehaviour
             map.Where(t => t.Z == tile.Z-1 && t.X == tile.X).FirstOrDefault() ?? new Tile(TileType.XXXX)
         };
         return adjacentTiles;
+    }
+
+    private float CalculateNoise(int x, int z, float scale)
+    {
+        Debug.Log(parsedSeed);
+        var calculatedX = x + x / (parsedSeed*x+1)*scale;
+        var calculatedZ = z + z / (parsedSeed*z+1)*scale;
+        var pn = Mathf.PerlinNoise(calculatedX, calculatedZ);
+        return pn;
     }
 
     public Material getMaterialFromType(TileType type)
