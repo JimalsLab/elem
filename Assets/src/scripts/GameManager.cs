@@ -9,12 +9,16 @@ public class GameManager : MonoBehaviour
     public int score;
     public SettingsManager settingsManager;
     private void Start() {
-        settingsManager = new SettingsManager();
-        worldMapManager = new WorldMapManager(Difficulty.NORMAL); // a terme ça ira dans une fction appelée quand on lance le jeu
+        settingsManager = gameObject.AddComponent<SettingsManager>();
     }
 
     private void Update() {
         
+    }
+
+    public void StartGame()
+    {
+        worldMapManager = gameObject.AddComponent<WorldMapManager>();
     }
 }
 

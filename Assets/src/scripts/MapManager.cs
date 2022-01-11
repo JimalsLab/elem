@@ -6,8 +6,10 @@ using System.Linq;
 
 public class MapManager : MonoBehaviour
 {
-    public long seed;
-    public float scale = 1f;
+    public long Seed = 3232132132139;
+    public float Scale = 1f;
+    public float HillScale = 1f;
+    public float Abruptness = 5;
     private float parsedSeed = 0.232432423424f;
     public int GrassPercentage = 50;
     public int DirtPercentage = 25;
@@ -21,30 +23,83 @@ public class MapManager : MonoBehaviour
     public Material XXXX;
 
     public List<Tile> Map;
+
+    private bool stepFinished = false;
+    private MapManagerStatus managerStatus;
+
     // Start is called before the first frame update
     void Start()
     {
-        parsedSeed = float.Parse("0," + seed.ToString());
 
-        RegenMap();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (managerStatus == MapManagerStatus.GENERATING)
+        {
+            foreach (Tile tile in Map)
+            {
+                if (tile.destination != default)
+                {
+                    if ((!Mathf.Approximately(tile.X,tile.destination.x) ||
+                        !Mathf.Approximately(tile.Y, tile.destination.y) ||
+                        !Mathf.Approximately(tile.Z, tile.destination.z)) && 
+                        (Mathf.Abs(tile.X-tile.destination.x) > 0.01 ||
+                        Mathf.Abs(tile.Y - tile.destination.y) > 0.01 ||
+                        Mathf.Abs(tile.Z - tile.destination.z) > 0.01 ))
+                    {
+                        tile.Obj.transform.position = Vector3.Lerp(tile.Obj.transform.position, tile.destination, 0.7f * Time.deltaTime);
+                        tile.X = tile.Obj.transform.position.x;
+                        tile.Y = tile.Obj.transform.position.y;
+                        tile.Z = tile.Obj.transform.position.z;
+                    }
+                    else
+                    {
+                        tile.Obj.transform.position = tile.destination;
+                        tile.X = tile.destination.x;
+                        tile.Y = tile.destination.y;
+                        tile.Z = tile.destination.z;
+                    }
+                }
+            }
+        }
+    }
+
+    public void InitMapWithParam(float scale = 1f,float hillScale = 1f, float abruptness = 5f, int grassPercentage = 85, int dirtPercentage = 10, int mapSize = 12)
+    {
+        Scale = scale;
+        HillScale = hillScale;
+        Abruptness = abruptness;
+        GrassPercentage = grassPercentage;
+        DirtPercentage = dirtPercentage;
+        MapSize = mapSize;
+        GetMaterials();
+
+        RegenMap();
+    }
+
+    private void GetMaterials()
+    {
+        GGGG = Resources.Load("materials/GGGG", typeof(Material)) as Material;
+        DGGG = Resources.Load("materials/DGGG", typeof(Material)) as Material;
+        GDGG = Resources.Load("materials/GDGG", typeof(Material)) as Material;
+        GGDG = Resources.Load("materials/GGDG", typeof(Material)) as Material;
+        GGGD = Resources.Load("materials/GGGD", typeof(Material)) as Material;
+        DDDD = Resources.Load("materials/DDDD", typeof(Material)) as Material;
+        XXXX = Resources.Load("materials/grid", typeof(Material)) as Material;
     }
 
     public void RegenMap()
     {
-        parsedSeed = float.Parse("0," + seed.ToString());
+        parsedSeed = float.Parse("0," + Seed.ToString());
         Map ??= new List<Tile>();
         foreach (var tile in Map)
         {
             Destroy(tile.Obj);
         }
         Map.Clear();
-        GenerateMap(seed, MapSize, 1, 1, scale);
-        StartCoroutine(GenerateHills(Map));
+        GenerateMap(Seed, MapSize, 1, 1, Scale);
     }
 
     private void GenerateMap(long seed, int generationIterations, int playerSlotsNumber, int enemySlotsNumber, float scale)
@@ -117,22 +172,64 @@ public class MapManager : MonoBehaviour
                 StartCoroutine(generateAdjacentTiles(seed * 7, generationIterationsLeft, westTile, scale));
             }
         }
+        else if (!stepFinished)
+        {
+            stepFinished = true;
+            managerStatus = MapManagerStatus.GENERATING;
+            StartCoroutine(GenerateHills(Map, HillScale));
+        }
     }
 
-    private IEnumerator GenerateHills(List<Tile> map)
+    private IEnumerator GenerateHills(List<Tile> map, float hillHeight) //a tester lmao
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.2f);
         //pas de x- z+
 
-        int randomX = MapSize -1 - int.Parse(seed.ToString().Substring(0, 1));
-        int randomZ = MapSize -1 - int.Parse(seed.ToString().Substring(seed.ToString().Length -1, 1));
+        int randomX = MapSize -1 - int.Parse(Seed.ToString().Substring(0, 1));
+        int randomZ = MapSize -1 - int.Parse(Seed.ToString().Substring(Seed.ToString().Length -1, 1));
 
         var centerTile = GetClosestTile(randomX, randomZ, map);
+        centerTile.destination = centerTile.Obj.transform.position + new Vector3(0,hillHeight,0);
+        centerTile.isLocked = true;
+
+        StartCoroutine(AdjustAdjacentTiles(map,centerTile,randomX+randomZ,hillHeight/Abruptness,(int)Abruptness));
+    }
+
+    private IEnumerator AdjustAdjacentTiles(List<Tile> map, Tile currentTile, int rnd, float hillHeight, int generationsLeft)
+    {
+        if (generationsLeft > 0)
+        {
+            yield return new WaitForSeconds(0.001f);
+
+            var height = hillHeight*generationsLeft;
+            if (currentTile.Y > 0)
+            {
+                List<Tile> adjacentTiles = GetAdjacentTiles(currentTile, map);
+                foreach (Tile tile in adjacentTiles)
+                {
+                    bool shouldMove = (rnd + tile.X + tile.Z) % 4 > 0;
+                    if (!tile.isLocked)
+                    {
+                        if (tile.Type != TileType.XXXX)
+                        {
+                            if (!shouldMove)
+                            {
+                                height = hillHeight * (generationsLeft + 1);
+                            }
+                            Debug.Log(tile.Obj);
+                            tile.destination = tile.Obj.transform.position + new Vector3(0, height, 0);
+                            tile.isLocked = true;
+                        }
+                        StartCoroutine(AdjustAdjacentTiles(map, tile, rnd, hillHeight, generationsLeft - 1));
+                    }
+                }
+            }
+        }
     }
 
     private Tile GetClosestTile(int x, int z, List<Tile> map)
     {
-        if (x < 0 && z > 0) // pour pas avoir la vision encombrée
+        if (x < 0 && z > 0) // pour pas avoir la vision encombrï¿½e
         {
             x = Mathf.Abs(x);
         }

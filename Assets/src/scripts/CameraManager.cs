@@ -38,7 +38,7 @@ public class CameraManager : MonoBehaviour
         if (Input.GetAxis("Mouse ScrollWheel") != 0f)
         {
             camera.transform.position += new Vector3(
-                Input.GetAxis("Mouse ScrollWheel") / Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")), 
+                Input.GetAxis("Mouse ScrollWheel") / Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")),
                 -Input.GetAxis("Mouse ScrollWheel") / Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")),
                 Input.GetAxis("Mouse ScrollWheel") / Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")));
         }
