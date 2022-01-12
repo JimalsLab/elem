@@ -385,9 +385,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 223974227}
-  - component: {fileID: 223974228}
   - component: {fileID: 223974229}
-  - component: {fileID: 223974230}
   - component: {fileID: 223974231}
   m_Layer: 0
   m_Name: scripts
@@ -410,32 +408,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &223974228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223974226}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a6f28476bcee0b4f95a72cc41c81f88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Seed: 0
-  Scale: 1
-  HillScale: 1
-  Abruptness: 5
-  GrassPercentage: 85
-  DirtPercentage: 10
-  MapSize: 15
-  GGGG: {fileID: 2100000, guid: c22fe6bd0b7bb2d4c938ad8157c77165, type: 2}
-  DGGG: {fileID: 2100000, guid: bb54fe3bb73c8494f923a76a7270aa01, type: 2}
-  GDGG: {fileID: 2100000, guid: 2e5d4ae31ea8c654788f95f5df48081c, type: 2}
-  GGDG: {fileID: 2100000, guid: 48ace882f3ae0ea4ea71699e890aaa81, type: 2}
-  GGGD: {fileID: 2100000, guid: 000f237e4f2fb7742b39a4aaac0e9ea5, type: 2}
-  DDDD: {fileID: 2100000, guid: 0e8484cf9f8ed93488680bbdbdc2f9f2, type: 2}
-  XXXX: {fileID: 2100000, guid: 3bbce75bc1db219468b0d31cc71ed3a4, type: 2}
 --- !u!114 &223974229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -451,18 +423,6 @@ MonoBehaviour:
   speed: 40
   focusPoint: {fileID: 1469698417}
   camera: {fileID: 963194227}
---- !u!114 &223974230
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223974226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39378143b3ead8d46a78c1acdea0720a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &223974231
 MonoBehaviour:
   m_ObjectHideFlags: 0
