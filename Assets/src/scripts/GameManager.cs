@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public WorldMapManager worldMapManager;
     public int score;
+    public WorldMapManager worldMapManager;
+    public UIManager uiManager;
     public SettingsManager settingsManager;
     private void Start() {
         settingsManager = gameObject.AddComponent<SettingsManager>();
+        uiManager = gameObject.AddComponent<UIManager>();
     }
 
     private void Update() {
