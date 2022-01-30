@@ -3,16 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Assets.src.scripts.entities;
 
 public class MapManager : MonoBehaviour
 {
-    public long Seed = 3232132132139;
+    private long Seed = 10983;
     public float Scale = 1f;
     public float HillScale = 1f;
     public float Abruptness = 5;
     private float parsedSeed = 0.232432423424f;
     public int GrassPercentage = 50;
     public int DirtPercentage = 25;
+    private int Level = 0;
     public int MapSize;
     public Material GGGG;
     public Material DGGG;
@@ -30,7 +32,7 @@ public class MapManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Seed = gameObject.GetComponent<WorldMapManager>().Seed;
     }
 
     // Update is called once per frame
@@ -66,7 +68,7 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    public void InitMapWithParam(float scale = 1f,float hillScale = 1f, float abruptness = 5f, int grassPercentage = 85, int dirtPercentage = 10, int mapSize = 12)
+    public void InitMapWithParam(int level,float scale = 1f,float hillScale = 1f, float abruptness = 5f, int grassPercentage = 85, int dirtPercentage = 10, int mapSize = 12)
     {
         Scale = scale;
         HillScale = hillScale;
@@ -74,6 +76,7 @@ public class MapManager : MonoBehaviour
         GrassPercentage = grassPercentage;
         DirtPercentage = dirtPercentage;
         MapSize = mapSize;
+        Level = level;
         GetMaterials();
 
         RegenMap();
@@ -92,6 +95,7 @@ public class MapManager : MonoBehaviour
 
     public void RegenMap()
     {
+
         parsedSeed = float.Parse("0," + Seed.ToString());
         Map ??= new List<Tile>();
         foreach (var tile in Map)
@@ -195,6 +199,11 @@ public class MapManager : MonoBehaviour
         StartCoroutine(AdjustAdjacentTiles(map,centerTile,randomX+randomZ,hillHeight/Abruptness,(int)Abruptness));
     }
 
+    private IEnumerator PlaceCharacters(List<Tile> map, List<Heroe> heroes, List<Enemy>enemies)
+    {
+        return null;
+    }
+
     private IEnumerator AdjustAdjacentTiles(List<Tile> map, Tile currentTile, int rnd, float hillHeight, int generationsLeft)
     {
         if (generationsLeft > 0)
@@ -216,7 +225,6 @@ public class MapManager : MonoBehaviour
                             {
                                 height = hillHeight * (generationsLeft + 1);
                             }
-                            Debug.Log(tile.Obj);
                             tile.destination = tile.Obj.transform.position + new Vector3(0, height, 0);
                             tile.isLocked = true;
                         }

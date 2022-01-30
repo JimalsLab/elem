@@ -3,14 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Assets.src.scripts.entities;
+
 public class WorldMapManager : MonoBehaviour {
 
+    public long Seed = 3232132132139;
     public List<LevelManager> levels;
     public float difficultyScale;
     public float lootScale;
     public Difficulty difficulty = Difficulty.NORMAL;
+
+    public Heroe heroe;
+
     private void Start() {
+        heroe = new Heroe();
         levels = new List<LevelManager>();
+
         difficulty = gameObject.GetComponent<SettingsManager>().difficulty;
         switch (difficulty)
         {
